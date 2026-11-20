@@ -1,0 +1,20 @@
+name: motion-recreate
+on: [push]
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: deps
+        run: |
+          python3 -m pip install --quiet pillow numpy
+          sudo apt-get install -y -qq ffmpeg
+      - name: render
+        run: |
+          python3 gen.py
+          ffmpeg -y -framerate 24 -i frames/f%04d.png -pix_fmt yuv420p -c:v libx264 -crf 18 motion.mp4 2>&1 | tail -1
+          ls -lh motion.mp4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: motion-video
+          path: motion.mp4
