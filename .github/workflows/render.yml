@@ -1,0 +1,40 @@
+name: render-anim
+on: [push]
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 装依赖
+        run: |
+          python3 -m pip install --quiet pillow
+          sudo apt-get install -y -qq ffmpeg
+      - name: 生成帧并合成视频
+        run: |
+          mkdir -p frames
+          python3 << 'PY'
+          from PIL import Image, ImageDraw, ImageFilter
+          import math, os
+          W=H=640; N=90
+          for i in range(N):
+              img=Image.new('RGB',(W,H),(8,10,28))
+              d=ImageDraw.Draw(img)
+              t=i/N*2*math.pi
+              cx,cy=W/2,H/2
+              for k in range(160):
+                  a=k/160*2*math.pi + t
+                  r=40+230*(k/160)+25*math.sin(t*3+k/8)
+                  x=cx+r*math.cos(a); y=cy+r*math.sin(a)
+                  col=(int(120+120*math.sin(a+t)),int(120+120*math.sin(a+t+2)),int(140+110*math.sin(a+t+4)))
+                  d.ellipse([x-3,y-3,x+3,y+3],fill=col)
+              img=img.filter(ImageFilter.GaussianBlur(0.6))
+              img.save(f'frames/f{i:04d}.png')
+          print('frames done', len(os.listdir('frames')))
+          PY
+          ffmpeg -y -framerate 30 -i frames/f%04d.png -pix_fmt yuv420p -c:v libx264 -crf 20 anim.mp4 2>&1 | tail -2
+          ls -lh anim.mp4
+      - name: 上传视频
+        uses: actions/upload-artifact@v4
+        with:
+          name: anim-video
+          path: anim.mp4
