@@ -12,7 +12,7 @@ jobs:
       - name: render
         run: |
           python3 gen.py
-          ffmpeg -y -framerate 24 -i frames/f%04d.png -pix_fmt yuv420p -c:v libx264 -crf 18 motion.mp4 2>&1 | tail -1
+          ffmpeg -y -framerate 24 -i frames/f%04d.png -vf scale=480:360 -pix_fmt yuv420p -c:v libx264 -crf 30 motion.mp4 2>&1 | tail -1
           ls -lh motion.mp4
       - uses: actions/upload-artifact@v4
         with:
