@@ -73,9 +73,10 @@ echo "源码写好"
 echo "=== 5. aapt2 链接资源+manifest ==="
 $BT/aapt2 link -o app.unsigned.apk -I $PLATFORM --manifest app/AndroidManifest.xml --java app/gen
 echo "=== 6. javac 编译 ==="
-javac -source 8 -target 8 -classpath $PLATFORM -d app/classes app/gen/**/R.java app/src/com/cloud/hello/MainActivity.java 2>&1 | grep -v "bootstrap" || true
+javac -source 8 -target 8 -classpath $PLATFORM -d app/classes app/src/com/cloud/hello/MainActivity.java
+echo "生成的class:"; find app/classes -name "*.class"
 echo "=== 7. d8 转dex ==="
-$BT/d8 --lib $PLATFORM --release --output app/ app/classes/com/cloud/hello/*.class
+$BT/d8 --lib $PLATFORM --release --output app/ $(find app/classes -name "*.class")
 echo "=== 8. 打包dex进apk ==="
 cd app && zip -q ../app.unsigned.apk classes.dex && cd ..
 echo "=== 9. zipalign + 签名 ==="
