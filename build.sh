@@ -1,9 +1,5 @@
 #!/bin/bash
 set -e
-# 强制 JDK 17 (d8 在新版JDK上会崩)
-sudo apt-get install -y -qq openjdk-17-jdk-headless >/dev/null 2>&1 || true
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-export PATH=$JAVA_HOME/bin:$PATH
 echo "JDK:"; java -version 2>&1 | head -1
 export ANDROID_SDK_ROOT=$HOME/android-sdk
 BT=$ANDROID_SDK_ROOT/build-tools/34.0.0
@@ -14,7 +10,9 @@ cd /tmp
 wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmd.zip
 unzip -q cmd.zip -d $ANDROID_SDK_ROOT/cmdline-tools
 mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null 2>&1 || true
+set +e
+yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null 2>&1
+set -e
 $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" >/dev/null 2>&1
 echo "SDK就绪"
 cd $GITHUB_WORKSPACE
