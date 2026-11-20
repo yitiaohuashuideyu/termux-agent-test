@@ -1,0 +1,19 @@
+name: cloud-test
+on: [push]
+jobs:
+  hello-cloud:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: system info
+        run: |
+          echo "=== GitHub Actions 云端 Linux 已启动 ==="
+          uname -a
+          echo "CPU核心数: $(nproc)"
+          free -h | grep Mem
+          df -h / | tail -1
+          node -v && python3 --version
+          echo "=== 尝试安装 ffmpeg(验证渲染能力) ==="
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y -qq ffmpeg >/dev/null 2>&1 && ffmpeg -version 2>&1 | head -1 || echo "ffmpeg安装失败"
+          echo "=== 云端任务完成 ==="
